@@ -40,6 +40,7 @@ sudo ifconfig lo0 alias 10.100.0.10/32
 
 1. add a route from the internal IP to that device
    sudo route add -net 10.142.0.0/20 -interface lo0
+
    or BIND it in your appliation
    SRC="10.100.0.10"
    PORT=12345
@@ -50,3 +51,21 @@ now when a packet gets created, its source IP will be 10.100.0.10.
 
 - the source IP is chosen at socket creation time. its based on either the bind address or the interface for routing
   and if its destination IP is the internal IP on the other side, the packet gets sent through the tunnel
+
+run this on the server
+
+python3 - <<'PY'
+import socket
+HOST = "10.142.0.2"
+PORT = 12345
+s = socket.socket()
+s.bind((HOST, PORT))
+s.listen(1)
+print("listening", HOST, PORT)
+c, addr = s.accept()
+print("conn from", addr)
+data = c.recv(4096)
+print("got:", data)
+c.sendall(b"ok\n")
+c.close()
+PY
